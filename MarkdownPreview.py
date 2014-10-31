@@ -279,9 +279,26 @@ class Compiler(object):
         ''' return the correct CSS file based on parser and settings '''
         return self.get_default_css() + self.get_override_css()
 
+    def get_less(self):
+        less_files = self.settings.get('less')
+        styles = ''
+
+        if less_files is not None:
+            # Ensure string values become a list.
+            if isinstance(less_files, str) or isinstance(less_files, unicode_str):
+                less_files = [less_files]
+            # Only load scripts if we have a list.
+            if isinstance(less_files, list):
+                for less_file in less_files:
+                    #styles += u"<style type='text/less'>%s</style>" % load_utf8(less_file)
+                    styles += u"<link rel='stylesheet/less' type='text/css' href='%s' />" % less_file
+        return styles
+
     def get_javascript(self):
         js_files = self.settings.get('js')
         scripts = ''
+        #sublime.error_message('hello!')
+        # sublime.console_message('HI!');
 
         if js_files is not None:
             # Ensure string values become a list.
@@ -573,7 +590,6 @@ class Compiler(object):
             head += self.get_highlight()
             head += self.get_mathjax()
             head += self.get_title()
-
             html = load_utf8(html_template)
             html = html.replace('{{ HEAD }}', head, 1)
             html = html.replace('{{ BODY }}', body, 1)
@@ -582,7 +598,7 @@ class Compiler(object):
             html += '<html><head><meta charset="utf-8">'
             html += self.get_meta()
             html += self.get_stylesheet()
-            html += self.get_javascript()
+            html += self.get_less()
             html += self.get_highlight()
             html += self.get_mathjax()
             html += self.get_title()
@@ -591,6 +607,7 @@ class Compiler(object):
             html += body
             html += '</article>'
             html += '</body>'
+            html += self.get_javascript()
             html += '</html>'
 
         return html, body
